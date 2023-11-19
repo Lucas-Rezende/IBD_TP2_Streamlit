@@ -5,7 +5,7 @@ import io
 
 # Função para criar ou conectar ao banco de dados
 def create_or_connect_database():
-    conn = sqlite3.connect('/tmp/consult.db')
+    conn = sqlite3.connect('consult.db')
     cursor = conn.cursor()
 
     return conn
