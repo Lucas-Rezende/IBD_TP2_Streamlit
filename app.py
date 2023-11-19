@@ -12,7 +12,7 @@ def create_or_connect_database():
 
 # Criar o aplicativo Streamlit
 def main():
-    st.title('Trabalho Prático 2 | Introdução à Banco de Dados :sunglasses:')
+    st.title('Trabalho Prático 2 | Introdução à Banco de Dados')
 
     # Adicione uma opção de seleção para o usuário escolher qual bloco de código executar
     opcao_bloco = st.selectbox('Selecione o Bloco de Código', ['Consulta 1', 'Consulta 2', 'Consulta 3', 'Consulta 4', 'Consulta 5', 'Consulta 6', 'Consulta 7', 'Consulta 8', 'Consulta 9', 'Consulta 10'])
@@ -25,9 +25,8 @@ def main():
         st.write("Por favor, verifique o banco de dados e tente novamente.")
         return
 
-    # Execute as consultas com base na opção do usuário
     if opcao_bloco == 'Consulta 1':
-        # Quantidade de voos por semestre
+        # Quantidade de voos por trimestre
         st.header("Quantidade de voos por trimestre.")
         query = """
         SELECT
@@ -47,11 +46,11 @@ def main():
             Trimestre;
         """
         df = pd.read_sql_query(query, conn)
-        st.bar_chart(df.set_index('Trimestre'))  # Use o método bar_chart do Streamlit para exibir os dados em um gráfico de barras
+        st.bar_chart(df.set_index('Trimestre'))
 
     if opcao_bloco == 'Consulta 2':
         # Calcular o Valor Total Perdido devido a No-Show e Cancelamentos Sem Reembolso (Apenas somando o Valor Liquido)
-        st.header("Valor Total Perdido devido a No-Show e Cancelamentos Sem Reembolso (Apenas somando o Valor Liquido).")
+        st.header("Valor total perdido devido a No-Show e Cancelamentos Sem Reembolso (Apenas somando o Valor Liquido).")
         query = """
         SELECT
             SUM(T.VB) AS Valor_Perdido
@@ -63,11 +62,11 @@ def main():
             R.NOSHOW = 'Sim'  OR (R.CANCELADO = 'Sim' AND R.VALORREEMBOLSO IS '0');
         """
         df = pd.read_sql_query(query, conn)
-        st.table(df)  # Use o método dataframe do Streamlit para exibir os dados
+        st.table(df)
 
     if opcao_bloco == 'Consulta 3':
         # Quantidade de voos de cada orgao superior
-        st.header("Quantidade de voos de cada orgao superior.")
+        st.header("Quantidade de voos de cada órgão superior.")
         query = """
         SELECT
             OS.NOMEOSUP AS nome_orgao_superior,
@@ -84,8 +83,8 @@ def main():
         st.bar_chart(df.set_index('nome_orgao_superior'))
 
     if opcao_bloco == 'Consulta 4':
-        #  identificar o Orgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens)
-        st.header("Orgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens).")
+        #  identificar o órgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens)
+        st.header("Órgão Superior que mais viajou no primeiro trimestre (Trimestre com menos viagens).")
         query = """
         SELECT
             OS.NOMEOSUP AS OrgaoSuperior,
@@ -110,7 +109,7 @@ def main():
 
     if opcao_bloco == 'Consulta 5':
         # Orgãos Solicitantes com mais No-Show e Cancelamentos Sem Reembolso (Comparar com os que mais viajam, tem relação?)
-        st.header("Orgãos Solicitantes com mais No-Show e Cancelamentos Sem Reembolso (Comparar com os que mais viajam, tem relação?).")
+        st.header("Órgãos Solicitantes com mais No-Show e Cancelamentos Sem Reembolso.")
         query = """
         SELECT
             OS.NOMEOSOLICIT AS OrgaoSolicitante,
@@ -129,11 +128,11 @@ def main():
         LIMIT 5;
         """
         df = pd.read_sql_query(query, conn)
-        st.table(df)  # Use o método dataframe do Streamlit para exibir os dados
+        st.table(df)
 
     if opcao_bloco == 'Consulta 6':
-        # média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pagado pela população e governo, respectivamente)
-        st.header("Média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pagado pela população e governo, respectivamente).")
+        # média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pago pela população e governo, respectivamente)
+        st.header("Média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pago pela população e governo, respectivamente).")
         query = """
         SELECT
             CA.NOMECOMPAEREA,
@@ -154,7 +153,7 @@ def main():
 
     if opcao_bloco == 'Consulta 7':
         # numero de cancelamento de viagens em que se pagou multa por orgao superior
-        st.header("Número de cancelamento de viagens em que se pagou multa por orgao superior")
+        st.header("Número de cancelamento de viagens em que se pagou multa por órgão superior")
         query = """
         SELECT
             OS.NOMEOSUP AS nome_orgao_superior,
