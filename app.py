@@ -149,19 +149,15 @@ def main():
         COMPANHIA_AEREA.NOMECOMPAEREA;
         """
         df = pd.read_sql_query(query, conn)
-        df.set_index('NOMECOMPAEREA', inplace=True)
+        # Criar um gráfico de barras para cada métrica
+        st.subheader("Média VTC por Companhia Aérea")
+        st.bar_chart(df[['media_vtc']], use_container_width=True)
 
-        # Cria três colunas
-        col1, col2, col3 = st.columns(3)
+        st.subheader("Média VTG por Companhia Aérea")
+        st.bar_chart(df[['media_vtg']], use_container_width=True)
 
-        # Cria um gráfico de barras para 'media_vtc' na primeira coluna
-        col1.bar_chart(df['media_vtc'])
-
-        # Cria um gráfico de barras para 'media_vtg' na segunda coluna
-        col2.bar_chart(df['media_vtg'])
-
-        # Cria um gráfico de barras para 'media_diferenca_vtg_vtc' na terceira coluna
-        col3.bar_chart(df['media_diferenca_vtg_vtc'])
+        st.subheader("Média Diferença entre VTG e VTC por Companhia Aérea")
+        st.bar_chart(df[['media_diferenca_vtg_vtc']], use_container_width=True)
 
     if opcao_bloco == 'Consulta 7':
         # numero de cancelamento de viagens em que se pagou multa por orgao superior
