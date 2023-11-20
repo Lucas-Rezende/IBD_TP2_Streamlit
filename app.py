@@ -197,6 +197,7 @@ def main():
         st.bar_chart(df.set_index('OrgaoSuperior'))
 
     if opcao_bloco == 'Consulta 9':
+        # Contagem de Viagens por Classe Tarifária
         st.header("Contagem de Viagens por Classe Tarifária")
         query = """
         SELECT COMPANHIA_AEREA.NOMECOMPAEREA, CTB, COUNT(*) AS quantidade
