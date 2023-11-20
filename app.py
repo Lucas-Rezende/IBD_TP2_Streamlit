@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import io
-import plotly.express as px
 
 # Função para criar ou conectar ao banco de dados
 def create_or_connect_database():
@@ -151,12 +150,18 @@ def main():
         """
         df = pd.read_sql_query(query, conn)
         df.set_index('NOMECOMPAEREA', inplace=True)
-        st.bar_chart(df[['media_vtc', 'media_vtg', 'media_diferenca_vtg_vtc']])
-        # Cria um gráfico de barras com plotly
-        fig = px.bar(df, barmode='group')
-        # Mostra o gráfico no Streamlit
-        st.plotly_chart(fig)
-        
+
+        # Cria três colunas
+        col1, col2, col3 = st.columns(3)
+
+        # Cria um gráfico de barras para 'media_vtc' na primeira coluna
+        col1.bar_chart(df['media_vtc'])
+
+        # Cria um gráfico de barras para 'media_vtg' na segunda coluna
+        col2.bar_chart(df['media_vtg'])
+
+        # Cria um gráfico de barras para 'media_diferenca_vtg_vtc' na terceira coluna
+        col3.bar_chart(df['media_diferenca_vtg_vtc'])
 
     if opcao_bloco == 'Consulta 7':
         # numero de cancelamento de viagens em que se pagou multa por orgao superior
