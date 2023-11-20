@@ -148,8 +148,10 @@ def main():
         GROUP BY
         COMPANHIA_AEREA.NOMECOMPAEREA;
         """
+        df = pd.read_sql_query(query, conn)
         df.set_index('NOMECOMPAEREA', inplace=True)
         st.bar_chart(df[['media_vtc', 'media_vtg', 'media_diferenca_vtg_vtc']])
+        
 
     if opcao_bloco == 'Consulta 7':
         # numero de cancelamento de viagens em que se pagou multa por orgao superior
