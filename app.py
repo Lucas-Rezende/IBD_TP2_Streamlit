@@ -1,5 +1,3 @@
-%%writefile app.py
-
 import streamlit as st
 import pandas as pd
 import sqlite3
@@ -7,14 +5,14 @@ import io
 
 # Função para criar ou conectar ao banco de dados
 def create_or_connect_database():
-    conn = sqlite3.connect('consult.db')
+    conn = sqlite3.connect('/tmp/consult.db')
     cursor = conn.cursor()
 
     return conn
 
 # Criar o aplicativo Streamlit
 def main():
-    st.title('Trabalho Prático 2 | Introdução à Banco de Dados')
+    st.title('Trabalho Prático 2 | Introdução à Banco de Dados :sunglasses:')
 
     # Adicione uma opção de seleção para o usuário escolher qual bloco de código executar
     opcao_bloco = st.selectbox('Selecione o Bloco de Código', ['Consulta 1', 'Consulta 2', 'Consulta 3', 'Consulta 4', 'Consulta 5', 'Consulta 6', 'Consulta 7', 'Consulta 8', 'Consulta 9', 'Consulta 10'])
@@ -27,8 +25,9 @@ def main():
         st.write("Por favor, verifique o banco de dados e tente novamente.")
         return
 
+    # Execute as consultas com base na opção do usuário
     if opcao_bloco == 'Consulta 1':
-        # Quantidade de voos por trimestre
+        # Quantidade de voos por semestre
         st.header("Quantidade de voos por trimestre.")
         query = """
         SELECT
@@ -48,11 +47,11 @@ def main():
             Trimestre;
         """
         df = pd.read_sql_query(query, conn)
-        st.bar_chart(df.set_index('Trimestre'))
+        st.bar_chart(df.set_index('Trimestre'))  # Use o método bar_chart do Streamlit para exibir os dados em um gráfico de barras
 
     if opcao_bloco == 'Consulta 2':
         # Calcular o Valor Total Perdido devido a No-Show e Cancelamentos Sem Reembolso (Apenas somando o Valor Liquido)
-        st.header("Valor total perdido devido a No-Show e Cancelamentos Sem Reembolso (Apenas somando o Valor Liquido).")
+        st.header("Valor Total Perdido devido a No-Show e Cancelamentos Sem Reembolso (Apenas somando o Valor Liquido).")
         query = """
         SELECT
             SUM(T.VB) AS Valor_Perdido
@@ -64,11 +63,11 @@ def main():
             R.NOSHOW = 'Sim'  OR (R.CANCELADO = 'Sim' AND R.VALORREEMBOLSO IS '0');
         """
         df = pd.read_sql_query(query, conn)
-        st.table(df)
+        st.table(df)  # Use o método dataframe do Streamlit para exibir os dados
 
     if opcao_bloco == 'Consulta 3':
         # Quantidade de voos de cada orgao superior
-        st.header("Quantidade de voos de cada órgão superior.")
+        st.header("Quantidade de voos de cada orgao superior.")
         query = """
         SELECT
             OS.NOMEOSUP AS nome_orgao_superior,
@@ -85,8 +84,8 @@ def main():
         st.bar_chart(df.set_index('nome_orgao_superior'))
 
     if opcao_bloco == 'Consulta 4':
-        #  identificar o órgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens)
-        st.header("Órgão Superior que mais viajou no primeiro trimestre (Trimestre com menos viagens).")
+        #  identificar o Orgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens)
+        st.header("Orgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens).")
         query = """
         SELECT
             OS.NOMEOSUP AS OrgaoSuperior,
@@ -110,46 +109,52 @@ def main():
         st.table(df.set_index('OrgaoSuperior'))
 
     if opcao_bloco == 'Consulta 5':
-        # saber qual companhia aérea é a mais utilizada
-        st.header("Qual a companhia aérea mais utilizada")
+        # Orgãos Solicitantes com mais No-Show e Cancelamentos Sem Reembolso (Comparar com os que mais viajam, tem relação?)
+        st.header("Orgãos Solicitantes com mais No-Show e Cancelamentos Sem Reembolso (Comparar com os que mais viajam, tem relação?).")
         query = """
         SELECT
-        COMPANHIA_AEREA.NOMECOMPAEREA, COUNT(*) AS total_utilizacoes
+            OS.NOMEOSOLICIT AS OrgaoSolicitante,
+            COUNT(CASE WHEN R.NOSHOW = 'Sim' THEN 1 END) AS QuantidadeNoShow,
+            COUNT(CASE WHEN R.CANCELADO = 'Sim' AND R.VALORREEMBOLSO = 0 THEN 1 END) AS QuantidadeCancelamentosSemReembolso
         FROM
-        VIAGEM
+            ORGAO_SOLICITANTE OS
         JOIN
-        COMPANHIA_AEREA ON VIAGEM.COMPAEREAID = COMPANHIA_AEREA.COMPAEREAID
+            VIAGEM V ON OS.OSOLICITID = V.OSOLICITID
+        JOIN
+            REGISTRO R ON V.LOCALIZADOR = R.LOCALIZADOR
         GROUP BY
-        COMPANHIA_AEREA.NOMECOMPAEREA
+            OS.NOMEOSOLICIT
         ORDER BY
-        total_utilizacoes DESC;
+            QuantidadeNoShow DESC, QuantidadeCancelamentosSemReembolso DESC
+        LIMIT 5;
         """
         df = pd.read_sql_query(query, conn)
-        st.table(df)
+        st.table(df)  # Use o método dataframe do Streamlit para exibir os dados
 
     if opcao_bloco == 'Consulta 6':
-        # Médias do Valor da Tarifa Comercial (VTC), do Valor da Tarifa do Governo (VTG) e da Diferença (VTG - VTC) para cada companhia aérea
-        st.header("Médias do Valor da Tarifa Comercial (VTC), do Valor da Tarifa do Governo (VTG) e da Diferença (VTG - VTC) para cada companhia aérea")
+        # média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pagado pela população e governo, respectivamente)
+        st.header("Média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pagado pela população e governo, respectivamente).")
         query = """
-        SELECT COMPANHIA_AEREA.NOMECOMPAEREA,
-            AVG(TARIFA.VTC) AS media_vtc,
-            AVG(TARIFA.VTG) AS media_vtg,
-            AVG(TARIFA.VTC - TARIFA.VTG) AS media_diferenca_vtg_vtc
+        SELECT
+            CA.NOMECOMPAEREA,
+            AVG(T.VTC - T.VTG) AS MediaDesconto
         FROM
-        VIAGEM
+            COMPANHIA_AEREA CA
         JOIN
-        COMPANHIA_AEREA ON VIAGEM.COMPAEREAID = COMPANHIA_AEREA.COMPAEREAID
+            VIAGEM V ON CA.COMPAEREAID = V.COMPAEREAID
         JOIN
-        TARIFA ON VIAGEM.LOCALIZADOR = TARIFA.LOCALIZADOR
+            TARIFA T ON V.LOCALIZADOR = T.LOCALIZADOR
+        WHERE
+            T.VTC > 0 AND T.VTG > 0
         GROUP BY
-        COMPANHIA_AEREA.NOMECOMPAEREA;
+            CA.NOMECOMPAEREA;
         """
         df = pd.read_sql_query(query, conn)
         st.bar_chart(df.set_index('NOMECOMPAEREA'))
 
     if opcao_bloco == 'Consulta 7':
         # numero de cancelamento de viagens em que se pagou multa por orgao superior
-        st.header("Número de cancelamento de viagens em que se pagou multa por órgão superior")
+        st.header("Número de cancelamento de viagens em que se pagou multa por orgao superior")
         query = """
         SELECT
             OS.NOMEOSUP AS nome_orgao_superior,
@@ -192,7 +197,6 @@ def main():
         st.bar_chart(df.set_index('OrgaoSuperior'))
 
     if opcao_bloco == 'Consulta 9':
-        # Contagem de Viagens por Classe Tarifária
         st.header("Contagem de Viagens por Classe Tarifária")
         query = """
         SELECT COMPANHIA_AEREA.NOMECOMPAEREA, CTB, COUNT(*) AS quantidade
