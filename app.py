@@ -12,7 +12,7 @@ def create_or_connect_database():
 
 # Criar o aplicativo Streamlit
 def main():
-    st.title('Trabalho Prático 2 | Introdução à Banco de Dados :sunglasses:')
+    st.title('Trabalho Prático 2 | Introdução à Banco de Dados')
 
     # Adicione uma opção de seleção para o usuário escolher qual bloco de código executar
     opcao_bloco = st.selectbox('Selecione o Bloco de Código', ['Consulta 1', 'Consulta 2', 'Consulta 3', 'Consulta 4', 'Consulta 5', 'Consulta 6', 'Consulta 7', 'Consulta 8', 'Consulta 9', 'Consulta 10'])
@@ -27,7 +27,7 @@ def main():
 
     # Execute as consultas com base na opção do usuário
     if opcao_bloco == 'Consulta 1':
-        # Quantidade de voos por semestre
+        # Quantidade de voos por trimestre
         st.header("Quantidade de voos por trimestre.")
         query = """
         SELECT
@@ -209,7 +209,7 @@ def main():
         LIMIT 10;
         """
         df = pd.read_sql_query(query, conn)
-        st.bar_chart(df.set_index('ClasseTarifaria'))
+        st.table(df.set_index('CTB'))
 
     if opcao_bloco == 'Consulta 10':
         st.header("Órgãos solicitantes que mais cancelaram viagens")
