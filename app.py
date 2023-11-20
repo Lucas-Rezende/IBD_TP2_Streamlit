@@ -228,6 +228,7 @@ def main():
         # Exibir apenas os N maiores órgãos solicitantes que mais cancelaram viagens
         N_maiores = 10
         st.bar_chart(df_sorted.head(N_maiores).set_index('OrgaoSolicitante'), use_container_width=True)
+        st.pyplot().locator_params(axis='x', nbins=10)
 
 if __name__ == '__main__':
     main()
