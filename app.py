@@ -149,9 +149,12 @@ def main():
         COMPANHIA_AEREA.NOMECOMPAEREA;
         """
         df = pd.read_sql_query(query, conn)
-    
-        # Criar um gráfico de barras para cada companhia aérea
-        st.bar_chart(df.set_index('NOMECOMPAEREA'), use_container_width=True)
+
+        # Normalizar as médias para que a soma seja igual a 1
+        df_normalized = df[['media_vtc', 'media_vtg', 'media_diferenca_vtg_vtc']].div(df[['media_vtc', 'media_vtg', 'media_diferenca_vtg_vtc']].sum(axis=1), axis=0)
+
+        # Criar um gráfico de barras empilhadas para cada companhia aérea
+        st.bar_chart(df_normalized.set_index('NOMECOMPAEREA'), use_container_width=True)
 
     if opcao_bloco == 'Consulta 7':
         # numero de cancelamento de viagens em que se pagou multa por orgao superior
