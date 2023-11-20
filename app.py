@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import io
+import plotly.express as px
 
 # Função para criar ou conectar ao banco de dados
 def create_or_connect_database():
@@ -151,6 +152,10 @@ def main():
         df = pd.read_sql_query(query, conn)
         df.set_index('NOMECOMPAEREA', inplace=True)
         st.bar_chart(df[['media_vtc', 'media_vtg', 'media_diferenca_vtg_vtc']])
+        # Cria um gráfico de barras com plotly
+        fig = px.bar(df, barmode='group')
+        # Mostra o gráfico no Streamlit
+        st.plotly_chart(fig)
         
 
     if opcao_bloco == 'Consulta 7':
