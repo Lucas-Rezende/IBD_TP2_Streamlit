@@ -232,7 +232,13 @@ def main():
             TotalCancelamentos DESC;
         """
         df = pd.read_sql_query(query, conn)
-        st.bar_chart(df.set_index('OrgaoSolicitante'))
+
+        # Ordenar o DataFrame pelo total de cancelamentos em ordem decrescente
+        df_sorted = df.sort_values(by='TotalCancelamentos', ascending=False)
+
+        # Exibir apenas os N maiores órgãos solicitantes que mais cancelaram viagens
+        N_maiores = 5
+        st.bar_chart(df_sorted.head(N_maiores).set_index('OrgaoSolicitante'), use_container_width=True)
 
     # Fechar a conexão com o banco de dados apenas ao final de todas as operações
     # conn.close()
