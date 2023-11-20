@@ -1,3 +1,5 @@
+%%writefile app.py
+
 import streamlit as st
 import pandas as pd
 import sqlite3
@@ -108,45 +110,39 @@ def main():
         st.table(df.set_index('OrgaoSuperior'))
 
     if opcao_bloco == 'Consulta 5':
-        # Orgãos Solicitantes com mais No-Show e Cancelamentos Sem Reembolso (Comparar com os que mais viajam, tem relação?)
-        st.header("Órgãos Solicitantes com mais No-Show e Cancelamentos Sem Reembolso.")
+        # saber qual companhia aérea é a mais utilizada
+        st.header("Qual a companhia aérea mais utilizada")
         query = """
         SELECT
-            OS.NOMEOSOLICIT AS OrgaoSolicitante,
-            COUNT(CASE WHEN R.NOSHOW = 'Sim' THEN 1 END) AS QuantidadeNoShow,
-            COUNT(CASE WHEN R.CANCELADO = 'Sim' AND R.VALORREEMBOLSO = 0 THEN 1 END) AS QuantidadeCancelamentosSemReembolso
+        COMPANHIA_AEREA.NOMECOMPAEREA, COUNT(*) AS total_utilizacoes
         FROM
-            ORGAO_SOLICITANTE OS
+        VIAGEM
         JOIN
-            VIAGEM V ON OS.OSOLICITID = V.OSOLICITID
-        JOIN
-            REGISTRO R ON V.LOCALIZADOR = R.LOCALIZADOR
+        COMPANHIA_AEREA ON VIAGEM.COMPAEREAID = COMPANHIA_AEREA.COMPAEREAID
         GROUP BY
-            OS.NOMEOSOLICIT
+        COMPANHIA_AEREA.NOMECOMPAEREA
         ORDER BY
-            QuantidadeNoShow DESC, QuantidadeCancelamentosSemReembolso DESC
-        LIMIT 5;
+        total_utilizacoes DESC;
         """
         df = pd.read_sql_query(query, conn)
         st.table(df)
 
     if opcao_bloco == 'Consulta 6':
-        # média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pago pela população e governo, respectivamente)
-        st.header("Média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pago pela população e governo, respectivamente).")
+        # Médias do Valor da Tarifa Comercial (VTC), do Valor da Tarifa do Governo (VTG) e da Diferença (VTG - VTC) para cada companhia aérea
+        st.header("Médias do Valor da Tarifa Comercial (VTC), do Valor da Tarifa do Governo (VTG) e da Diferença (VTG - VTC) para cada companhia aérea")
         query = """
-        SELECT
-            CA.NOMECOMPAEREA,
-            AVG(T.VTC - T.VTG) AS MediaDesconto
+        SELECT COMPANHIA_AEREA.NOMECOMPAEREA,
+            AVG(TARIFA.VTC) AS media_vtc,
+            AVG(TARIFA.VTG) AS media_vtg,
+            AVG(TARIFA.VTC - TARIFA.VTG) AS media_diferenca_vtg_vtc
         FROM
-            COMPANHIA_AEREA CA
+        VIAGEM
         JOIN
-            VIAGEM V ON CA.COMPAEREAID = V.COMPAEREAID
+        COMPANHIA_AEREA ON VIAGEM.COMPAEREAID = COMPANHIA_AEREA.COMPAEREAID
         JOIN
-            TARIFA T ON V.LOCALIZADOR = T.LOCALIZADOR
-        WHERE
-            T.VTC > 0 AND T.VTG > 0
+        TARIFA ON VIAGEM.LOCALIZADOR = TARIFA.LOCALIZADOR
         GROUP BY
-            CA.NOMECOMPAEREA;
+        COMPANHIA_AEREA.NOMECOMPAEREA;
         """
         df = pd.read_sql_query(query, conn)
         st.bar_chart(df.set_index('NOMECOMPAEREA'))
@@ -196,26 +192,16 @@ def main():
         st.bar_chart(df.set_index('OrgaoSuperior'))
 
     if opcao_bloco == 'Consulta 9':
-        st.header("Preferência da classe tarifária dos servidores públicos")
+        # Contagem de Viagens por Classe Tarifária
+        st.header("Contagem de Viagens por Classe Tarifária")
         query = """
-        SELECT
-            T.VTG AS ClasseTarifaria,
-            COUNT(V.LOCALIZADOR) AS NumeroDeViagens
-        FROM
-            TARIFA T
-        JOIN
-            VIAGEM V ON T.LOCALIZADOR = V.LOCALIZADOR
-        JOIN
-            ORGAO_SUPERIOR OS ON V.OSUPID = OS.OSUPID
-        JOIN
-            ORGAO_SOLICITANTE OSOLICIT ON V.OSOLICITID = OSOLICIT.OSOLICITID
-        WHERE
-            OS.CNPJ IS NOT NULL AND OSOLICIT.CNPJ IS NOT NULL
-        GROUP BY
-            T.VTG
-        ORDER BY
-            NumeroDeViagens DESC
-          LIMIT 10;
+        SELECT COMPANHIA_AEREA.NOMECOMPAEREA, CTB, COUNT(*) AS quantidade
+        FROM VIAGEM
+        JOIN COMPANHIA_AEREA ON VIAGEM.COMPAEREAID = COMPANHIA_AEREA.COMPAEREAID
+        WHERE CTB IS NOT NULL
+        GROUP BY CTB, COMPANHIA_AEREA.NOMECOMPAEREA
+        ORDER BY quantidade DESC
+        LIMIT 10;
         """
         df = pd.read_sql_query(query, conn)
         st.bar_chart(df.set_index('ClasseTarifaria'))
