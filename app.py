@@ -5,7 +5,7 @@ import io
 
 # Função para criar ou conectar ao banco de dados
 def create_or_connect_database():
-    conn = sqlite3.connect('/tmp/consult.db')
+    conn = sqlite3.connect('consult.db')
     cursor = conn.cursor()
 
     return conn
@@ -67,7 +67,7 @@ def main():
 
     if opcao_bloco == 'Consulta 3':
         # Quantidade de voos de cada orgao superior
-        st.header("Quantidade de voos de cada orgao superior.")
+        st.header("Quantidade de voos de cada Órgão superior.")
         query = """
         SELECT
             OS.NOMEOSUP AS nome_orgao_superior,
@@ -85,7 +85,7 @@ def main():
 
     if opcao_bloco == 'Consulta 4':
         #  identificar o Orgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens)
-        st.header("Orgão Superior que mais viajou no primeiro trimestre(Trimestre com menos viagens).")
+        st.header("Órgão Superior que mais viajou no primeiro trimestre (Trimestre com menos viagens).")
         query = """
         SELECT
             OS.NOMEOSUP AS OrgaoSuperior,
@@ -133,21 +133,20 @@ def main():
 
     if opcao_bloco == 'Consulta 6':
         # média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pagado pela população e governo, respectivamente)
-        st.header("Média do desconto relativo entre a VTC e a VTG para cada companhia aérea. (Tributo pagado pela população e governo, respectivamente).")
+        st.header("Média do desconto relativo entre a VTC e a VTG para cada companhia aérea (Tributo pagado pela população e governo, respectivamente).")
         query = """
-        SELECT
-            CA.NOMECOMPAEREA,
-            AVG(T.VTC - T.VTG) AS MediaDesconto
+        SELECT COMPANHIA_AEREA.NOMECOMPAEREA,
+            AVG(TARIFA.VTC) AS media_vtc,
+            AVG(TARIFA.VTG) AS media_vtg,
+            AVG(TARIFA.VTC - TARIFA.VTG) AS media_diferenca_vtg_vtc
         FROM
-            COMPANHIA_AEREA CA
+        VIAGEM
         JOIN
-            VIAGEM V ON CA.COMPAEREAID = V.COMPAEREAID
+        COMPANHIA_AEREA ON VIAGEM.COMPAEREAID = COMPANHIA_AEREA.COMPAEREAID
         JOIN
-            TARIFA T ON V.LOCALIZADOR = T.LOCALIZADOR
-        WHERE
-            T.VTC > 0 AND T.VTG > 0
+        TARIFA ON VIAGEM.LOCALIZADOR = TARIFA.LOCALIZADOR
         GROUP BY
-            CA.NOMECOMPAEREA;
+        COMPANHIA_AEREA.NOMECOMPAEREA;
         """
         df = pd.read_sql_query(query, conn)
         st.bar_chart(df.set_index('NOMECOMPAEREA'))
