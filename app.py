@@ -155,7 +155,7 @@ def main():
 
     if opcao_bloco == 'Consulta 7':
         # numero de cancelamento de viagens em que se pagou multa por orgao superior
-        st.header("Número de cancelamento de viagens em que se pagou multa por orgao superior")
+        st.header("Número de cancelamento de viagens em que se pagou multa por Órgão superior")
         query = """
         SELECT
             OS.NOMEOSUP AS nome_orgao_superior,
